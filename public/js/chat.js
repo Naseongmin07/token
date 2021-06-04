@@ -1,6 +1,7 @@
 const chatBtn = document.querySelector('#chatBtn')
 const chatRoom = document.querySelector('#chatRoom')
 let flag = undefined;
+let userId
 
 chatBtn.addEventListener('click' ,async ()=>{
 
@@ -39,12 +40,12 @@ async function getChatRoom(){
     }
 }
 
-async function socketChat(){
+function socketChat(){
     socket = io();
-    socket.on('connect',()=>{})
     socket.on('userid',data=>{
         userId = data   
     })
+
     socket.on('msg',data=>{
         chatBtn.dataset.value = parseInt(chatBtn.dataset.value)+1
         if(flag==false){
@@ -54,11 +55,10 @@ async function socketChat(){
     })
 }
 
-
-
 function send(){
+    
     const msg = document.querySelector('#msg')
-    socket.emit('send',msg.value)
+    socket.emit('send',{userid:userId, msg: msg.value})
     addCard(userId,msg.value,'my')
 }
 

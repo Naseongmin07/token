@@ -25,7 +25,7 @@ async function submitBtnFn(){
     const userpwCheck = document.querySelector('.userpw_check').value
     const username = document.querySelector('.username').value
     const gender = document.querySelector('.gender').checked
-    const userimage = document.querySelector('#input_image').value
+    const userimage = document.querySelector('#input_image').files[0]
     const useremail = document.querySelector('.useremail').value
 
     if(userpw!=userpwCheck){
@@ -36,22 +36,22 @@ async function submitBtnFn(){
         alert('빈칸을 채워주세요')
         return
     }
+    let formData = new FormData()
+    formData.append('image',userimage)
+    formData.append('userid',userid)
+    formData.append('userpw',userpw)
+    formData.append('username',username)
+    formData.append('gender',gender)
+    formData.append('useremail',useremail)
 
     let url = 'http://localhost:3000/user/join_success'
     let options = {
         method:'POST',
         headers:{
-            'content-type' : 'application/json',
         },
-        body: JSON.stringify({
-            userid: userid,
-            userpw: userpw,
-            username: username,
-            gender: gender,
-            userimage: userimage,
-            useremail: useremail,
-        }),
-    }
+        body: 
+            formData 
+            }
     let response = await fetch(url,options);
-    window.location.href = 'http://localhost:3000/?msg=회원가입이 완료되었습니다'
+    // window.location.href = 'http://localhost:3000/?msg=회원가입이 완료되었습니다'
 }

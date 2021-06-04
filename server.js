@@ -11,6 +11,17 @@ const socket = require('socket.io')
 const http = require('http')
 const server = http.createServer(app)
 const io = socket(server)
+const multer = require('multer');
+const e = require('express');
+const storage = multer.diskStorage({
+    destination: (req, file, cb)=>{
+        cb(null, 'uploads/')
+    },
+    filename: (req, file, cb)=>{
+        cb(null, file.originalname)
+    }
+})
+const upload = multer({storage: storage})
 
 app.set('view engine', 'html')
 
@@ -59,11 +70,13 @@ app.get('/user/userid_check',async (req,res)=>{
 })
 
 
-app.post('/user/join_success',async (req,res)=>{
-    let{userid, userpw, username, gender, userimage, useremail} = req.body
+app.post('/user/join_success',upload.single('image'),async (req,res)=>{
+    let userimage = req.file.path
+    let{userid, userpw, username, gender,  useremail} = req.body
+    console.log(userimage)
     let token = chash(userpw)
     let result = await User.create({
-        userid, token, username, gender, useremail, userimage
+        userid, token, username, gender, useremail, userimage 
     })
     res.json({result})
 })
@@ -102,6 +115,7 @@ app.get('/chat',auth,(req,res)=>{
 
 
 io.sockets.on('connection',socket=>{
+    
     let cookie = socket.handshake.headers.cookie
     
     if(cookie != undefined){
@@ -118,10 +132,21 @@ io.sockets.on('connection',socket=>{
     socket.emit('userid',userid)
 
     socket.on('send',data=>{
-        socket.broadcast.emit('msg',{userid:userid,data:data})
+        socket.broadcast.emit('msg',{userid:data.userid,data:data.msg})
     })
 })
 
 server.listen(3000,()=>{
     console.log('server start port: 3000');
 })
+
+// npx sequelize-auto -o "./models" -d class -h localhost -u root -p 3306 -x sksskdia -e mysqln 
+// npm install -g sequelize-auto
+// sequelize-auto -o -d -h -u -p -x -e
+// -o "경로"
+// -d "데이터베이스"
+// -h "url -> localhost"
+// -u "root"
+// -p "port"
+// -x "password"
+// -e "mysql"
